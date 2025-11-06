@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI & Международные отношения - Расширенная карта</title>
+<style>
+body {font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;overflow:hidden;}
+header {background:rgba(30,41,59,0.95);border-bottom:2px solid #334155;padding:20px 30px;box-shadow:0 4px 6px rgba(0,0,0,0.3);}
+h1 {font-size:28px;font-weight:700;color:#f1f5f9;margin-bottom:8px;}
+.subtitle {font-size:14px;color:#94a3b8;}
+.legend {padding:9px 18px;font-size:15px;background:rgba(30,41,59,0.84);border:1.5px solid #334155;border-radius:8px;margin:12px 0 0 10px;display:flex;gap:24px;align-items:center;}
+.legend-item {display:flex;align-items:center;gap:6px;font-size:14px;}
+.legend-star {color:#c026d3;font-weight:bold;margin-right:3px;font-size:17px;}
+.legend-circle {width:17px;height:17px;border-radius:50%;display:inline-block;margin-right:4px;}
+#main-container {display:flex;height:calc(100vh - 100px);}
+#canvas-container {flex:1;position:relative;overflow:hidden;min-width:320px;}
+#sidebar {
+    width:400px;
+    min-width:260px;
+    background:rgba(30,41,59,.95);
+    padding:20px;
+    overflow-y:auto;
+    border-left:2px solid #334155;
+    box-sizing:border-box;
+    height:92%;
+    max-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+#cluster-list {
+    flex:1 1 auto;
+    overflow-y:auto;
+}
+.sidebar-title {font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:16px;}
+.cluster-list-title {font-size:15px;margin-bottom:7px;color:#94a3b8;}
+.back-btn {background:rgba(59,130,246,0.2)!important;border:1.5px solid #3b82f6;color:#60a5fa;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:15px;margin-bottom:16px;margin-top:6px;transition:all 0.22s;display:none;font-weight:500;outline:none;}
+.back-btn.visible {display:block;}
+.back-btn:hover {background:rgba(59,130,246,0.35);border-color:#60a5fa;}
+.cluster-item {background:rgba(15,23,42,0.6);border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;border:1.2px solid transparent;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:space-between;}
+.cluster-item:hover {background:rgba(51,65,85,0.8);border-color:#475569;transform:translateX(4px);}
+.cluster-item.selected {background:rgba(59,130,246,0.25);border:2.7px solid #fff!important;box-shadow:0 0 0 2px #3b82f6,0 2px 8px rgba(59,130,246,0.08);}
+.cluster-item.russia-related {border-left:3px solid #c026d3;}
+.cluster-icon {display:inline-block;width:19px;height:19px;border-radius:50%;margin-right:7px;vertical-align:middle;border:2px solid #222831;}
+.cluster-star {color:#c026d3;font-size:17px;font-weight:bold;margin-right:2px;vertical-align:middle;}
+.cluster-pubcount {font-size:16px;font-weight:bold;border-radius:8px;min-width:36px;padding:1px 7px;margin-left:12px;text-align:center;display:inline-block;}
+.connection-item {background:rgba(15,23,42,0.6);border-radius:6px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;}
+.connection-item .conn-info {display:flex;align-items:center;gap:7px;flex-grow:1;}
+.connection-strength {display:flex;gap:3px;}
+.strength-dot {width:6px;height:6px;border-radius:50%;background:#60a5fa;}
+.conn-icon {display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #222831;}
+.conn-pubcount {font-size:14px;font-weight:bold;border-radius:8px;min-width:31px;padding:1px 6px;margin-left:7px;text-align:center;display:inline-block;}
+.publications-section {
+    margin-top:20px;
+    background:rgba(15,23,42,0.4);
+    border-radius:8px;
+    padding:16px;
+    max-height:380px;
+    overflow-y:auto;
+}
+.publication-item {background:rgba(30,41,59,0.6);border-radius:6px;padding:12px;margin-bottom:10px;border-left:3px solid #3b82f6;transition:all 0.2s;}
+.publication-item:hover {background:rgba(51,65,85,0.8);transform:translateX(2px);}
+.publication-link {color:#60a5fa;text-decoration:none;}
+::-webkit-scrollbar {width:8px;}
+::-webkit-scrollbar-track {background:rgba(15,23,42,0.4);}
+::-webkit-scrollbar-thumb {background:#475569;border-radius:4px;}
+::-webkit-scrollbar-thumb:hover {background:#64748b;}
+canvas {cursor:grab;display:block;width:100%;height:100%;}
+canvas:active {cursor:grabbing;}
+#controls {position:absolute;top:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:10;}
+.control-btn {background:rgba(30,41,59,0.95);border:1px solid #475569;color:#f1f5f9;width:45px;height:45px;border-radius:8px;cursor:pointer;font-size:20px;transition:all 0.2s;box-shadow:0 4px 6px rgba(0,0,0,0.3);}
+.control-btn:hover {background:rgba(51,65,85,0.95);border-color:#64748b;transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,0.4);}
+#tooltip {position:absolute;bottom:20px;left:20px;background:rgba(30,41,59,0.98);border:1px solid #475569;border-radius:12px;padding:16px 20px;max-width:350px;box-shadow:0 8px 16px rgba(0,0,0,0.4);display:none;z-index:10;}
+#tooltip.visible {display:block;}
+/* --- Адаптивные стили --- */
+@media (max-width: 900px) {
+    #sidebar { width: 320px; padding:12px; }
+    header { padding: 12px 8px; }
+}
+@media (max-width: 700px) {
+    #main-container { flex-direction: column; }
+    #canvas-container, #sidebar { width: 100% !important; max-width:100vw; }
+    #sidebar { height:auto; min-height:240px; border-left:none; border-top:2px solid #334155; }
+    .sidebar-title { margin-top:13px;}
+}
+@media (max-width: 430px) {
+    h1 { font-size: 17px; }
+    .subtitle { font-size: 11px; }
+    .sidebar-title, .cluster-list-title { font-size: 14px; }
+    .cluster-item, .connection-item { font-size:12px; padding:8px 6px;}
+    .publications-section { max-height:150px;}
+}
+/* Для мобильных — скроллинг обязателен */
+#sidebar, #cluster-list {max-height: 90vh; min-height:200px; overflow-y:auto;}
+</style>
+</head>
+<body>
+<header>
+    <h1>Интерактивная карта: ИИ и международные отношения (с российским контекстом)</h1>
+    <div class="subtitle">Визуализация научных кластеров • Размер узла = объем публикаций • Толщина линии = сила связи • <span class="legend-star">*</span> Российские темы</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-circle" style="background:#3b82f6"></span>Научный кластер</span>
+      <span class="legend-item"><span class="legend-star">*</span>Российские темы</span>
+      <span class="legend-item">Толщина линии = сила связи</span>
+      <span class="legend-item">Размер кружка = публикаций</span>
+    </div>
+</header>
+<div id="main-container">
+    <div id="canvas-container">
+        <canvas id="network-canvas"></canvas>
+        <div id="controls">
+            <button class="control-btn" id="zoom-in" title="Увеличить">+</button>
+            <button class="control-btn" id="zoom-out" title="Уменьшить">−</button>
+            <button class="control-btn" id="reset" title="Сбросить">⟲</button>
+        </div>
+        <div id="tooltip">
+            <div class="tooltip-title"></div>
+            <div class="tooltip-papers"></div>
+            <div class="tooltip-hint">Нажмите для подробностей</div>
+        </div>
+    </div>
+    <div id="sidebar">
+        <button id="back-btn" class="back-btn">← Назад к обзору</button>
+        <div class="sidebar-title">Исследовательские кластеры</div>
+        <div class="cluster-list-title"></div>
+        <div id="cluster-list"></div>
+    </div>
+</div>
+<script>
+const clusters = [{"id": 1, "label": "AI Governance", "x": 400, "y": 300, "size": 45, "color": "#3b82f6", "papers": 1250}, {"id": 2, "label": "AI & Military Strategy", "x": 250, "y": 200, "size": 38, "color": "#ef4444", "papers": 890}, {"id": 3, "label": "Cyber Security", "x": 200, "y": 320, "size": 35, "color": "#dc2626", "papers": 780}, {"id": 4, "label": "Autonomous Weapons", "x": 150, "y": 180, "size": 32, "color": "#991b1b", "papers": 650}, {"id": 5, "label": "Tech Sovereignty", "x": 550, "y": 180, "size": 36, "color": "#8b5cf6", "papers": 820}, {"id": 6, "label": "US-China AI Competition", "x": 650, "y": 250, "size": 40, "color": "#7c3aed", "papers": 950}, {"id": 7, "label": "Digital Authoritarianism", "x": 600, "y": 350, "size": 33, "color": "#6d28d9", "papers": 720}, {"id": 8, "label": "AI & Global Economy", "x": 450, "y": 480, "size": 37, "color": "#10b981", "papers": 840}, {"id": 9, "label": "Trade Policy & Tech", "x": 320, "y": 520, "size": 30, "color": "#059669", "papers": 620}, {"id": 10, "label": "Labor Markets", "x": 550, "y": 550, "size": 28, "color": "#047857", "papers": 580}, {"id": 11, "label": "Multilateral AI Policy", "x": 280, "y": 400, "size": 34, "color": "#f59e0b", "papers": 750}, {"id": 12, "label": "International Standards", "x": 380, "y": 150, "size": 31, "color": "#d97706", "papers": 680}, {"id": 13, "label": "EU AI Regulation", "x": 480, "y": 120, "size": 33, "color": "#b45309", "papers": 710}, {"id": 14, "label": "AI Ethics in IR", "x": 150, "y": 450, "size": 32, "color": "#ec4899", "papers": 690}, {"id": 15, "label": "Surveillance & Privacy", "x": 100, "y": 350, "size": 29, "color": "#db2777", "papers": 610}, {"id": 16, "label": "Digital Rights", "x": 200, "y": 520, "size": 27, "color": "#be185d", "papers": 560}, {"id": 17, "label": "AI & Climate Diplomacy", "x": 650, "y": 450, "size": 26, "color": "#14b8a6", "papers": 540}, {"id": 18, "label": "Disinformation & Propaganda", "x": 700, "y": 350, "size": 30, "color": "#f97316", "papers": 640}, {"id": 19, "label": "AI in Intelligence", "x": 300, "y": 250, "size": 28, "color": "#7f1d1d", "papers": 590}, {"id": 20, "label": "Emerging Tech Alliances", "x": 550, "y": 280, "size": 29, "color": "#5b21b6", "papers": 605}, {"id": 21, "label": "Global South & AI", "x": 400, "y": 580, "size": 27, "color": "#0891b2", "papers": 570}, {"id": 22, "label": "Indo-Pacific Strategy", "x": 680, "y": 180, "size": 28, "color": "#4338ca", "papers": 585}, {"id": 23, "label": "Russia AI Strategy & Sovereignty", "x": 500, "y": 400, "size": 32, "color": "#c026d3", "papers": 680, "isRussia": true}, {"id": 24, "label": "Russia-China AI Cooperation", "x": 620, "y": 420, "size": 30, "color": "#a21caf", "papers": 620, "isRussia": true}, {"id": 25, "label": "BRICS AI Governance", "x": 380, "y": 430, "size": 31, "color": "#f97316", "papers": 650, "isRussia": true}];
+const connections = [{"from": 1, "to": 2, "weight": 3}, {"from": 1, "to": 5, "weight": 4}, {"from": 1, "to": 6, "weight": 3}, {"from": 1, "to": 8, "weight": 3}, {"from": 1, "to": 11, "weight": 4}, {"from": 1, "to": 12, "weight": 3}, {"from": 1, "to": 13, "weight": 4}, {"from": 1, "to": 14, "weight": 3}, {"from": 2, "to": 3, "weight": 3}, {"from": 2, "to": 4, "weight": 4}, {"from": 2, "to": 6, "weight": 3}, {"from": 2, "to": 19, "weight": 2}, {"from": 3, "to": 15, "weight": 3}, {"from": 3, "to": 18, "weight": 2}, {"from": 4, "to": 12, "weight": 2}, {"from": 5, "to": 6, "weight": 4}, {"from": 5, "to": 7, "weight": 3}, {"from": 5, "to": 13, "weight": 2}, {"from": 5, "to": 20, "weight": 3}, {"from": 6, "to": 7, "weight": 3}, {"from": 6, "to": 8, "weight": 2}, {"from": 6, "to": 18, "weight": 2}, {"from": 6, "to": 22, "weight": 3}, {"from": 7, "to": 15, "weight": 4}, {"from": 7, "to": 18, "weight": 4}, {"from": 8, "to": 9, "weight": 3}, {"from": 8, "to": 10, "weight": 3}, {"from": 8, "to": 21, "weight": 2}, {"from": 9, "to": 10, "weight": 2}, {"from": 9, "to": 12, "weight": 2}, {"from": 11, "to": 12, "weight": 3}, {"from": 11, "to": 13, "weight": 3}, {"from": 11, "to": 14, "weight": 2}, {"from": 12, "to": 13, "weight": 4}, {"from": 13, "to": 14, "weight": 2}, {"from": 14, "to": 15, "weight": 3}, {"from": 14, "to": 16, "weight": 3}, {"from": 15, "to": 16, "weight": 3}, {"from": 17, "to": 8, "weight": 2}, {"from": 17, "to": 11, "weight": 2}, {"from": 18, "to": 19, "weight": 2}, {"from": 19, "to": 2, "weight": 3}, {"from": 20, "to": 22, "weight": 2}, {"from": 21, "to": 14, "weight": 2}, {"from": 3, "to": 19, "weight": 3}, {"from": 21, "to": 8, "weight": 3}, {"from": 23, "to": 1, "weight": 3}, {"from": 23, "to": 5, "weight": 4}, {"from": 23, "to": 7, "weight": 3}, {"from": 23, "to": 11, "weight": 3}, {"from": 24, "to": 6, "weight": 4}, {"from": 24, "to": 23, "weight": 4}, {"from": 24, "to": 20, "weight": 3}, {"from": 25, "to": 11, "weight": 4}, {"from": 25, "to": 23, "weight": 4}, {"from": 25, "to": 1, "weight": 3}, {"from": 25, "to": 21, "weight": 3}];
+const publications = {"1": [{"title": "AI Governance in a Complex and Rapidly Changing Regulatory Landscape", "year": 2024, "journal": "Nature", "url": "https://www.nature.com/articles/s41599-024-03560-x"}, {"title": "The Oxford Handbook of AI Governance", "year": 2022, "journal": "Oxford Academic", "url": "https://academic.oup.com/edited-volume/41989"}, {"title": "Navigating geopolitics in AI governance", "year": 2024, "journal": "OXGS Report", "url": "https://oxgs.org/2024/04/08/oxgs-report-navigating-geopolitics-in-ai-governance/"}, {"title": "AI Technologies and International Relations", "year": 2024, "journal": "International Studies", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11575148/"}, {"title": "Strengthening international cooperation on AI", "year": 2023, "journal": "Brookings", "url": "https://www.brookings.edu/articles/strengthening-international-cooperation-on-ai/"}], "2": [{"title": "Artificial Intelligence in Modern Military Strategy", "year": 2025, "journal": "JMSDS", "url": "https://jmsds.fupress.org/index.php/jmsds/article/view/1"}, {"title": "Artificial Intelligence and Global Security", "year": 2024, "journal": "SSRN", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4998408"}, {"title": "Modernizing Military Decision-Making", "year": 2025, "journal": "Army Press", "url": "https://www.armyupress.army.mil/Journals/Military-Review/Online-Exclusive/2025-OLE/Modernizing-Military-Decision-Making/"}, {"title": "Impact of Military AI on Nuclear Escalation", "year": 2025, "journal": "SIPRI", "url": "https://www.sipri.org/publications/2025/sipri-insights-peace-and-security/impact-military-artificial-intelligence-nuclear-escalation-risk"}, {"title": "AI for Military Decision-Making", "year": 2025, "journal": "CSET", "url": "https://cset.georgetown.edu/publication/ai-for-military-decision-making/"}], "3": [{"title": "Cyber Security and International Relations in the AI Era", "year": 2018, "journal": "IISE", "url": "https://www.i-ise.com/en/information/report/201903/2019_03.html"}, {"title": "Is artificial intelligence a new battleground for cybersecurity?", "year": 2024, "journal": "ScienceDirect", "url": "https://www.sciencedirect.com/science/article/abs/pii/S254266052400369X"}, {"title": "Artificial Intelligence and Cybersecurity: Balancing Risks", "year": 2025, "journal": "WEF", "url": "https://reports.weforum.org/docs/WEF_Artificial_Intelligence_and_Cybersecurity_Balancing_Risks_and_Rewards_2025.pdf"}, {"title": "Critical Perspectives on Cybersecurity in IR", "year": 2025, "journal": "Oxford Academic", "url": "https://academic.oup.com/isagsq/article/5/3/ksaf067/8237801"}, {"title": "AI and Cybersecurity: Balancing Innovation and Security", "year": 2025, "journal": "Trends Research", "url": "https://trendsresearch.org/publication/ai-and-cybersecurity-balancing-innovation-and-security-in-the-digital-age/"}], "4": [{"title": "Lethal Autonomous Weapons Systems & International Law", "year": 2025, "journal": "ASIL", "url": "https://www.asil.org/insights/volume/29/issue/1"}, {"title": "Autonomous Weapon Systems and IHL", "year": 2025, "journal": "SIPRI", "url": "https://www.sipri.org/publications/2021/policy-reports/autonomous-weapon-systems-and-international-humanitarian-law-identifying-limits-and-required-type"}, {"title": "AI & Autonomous Weapons: Can IHL Keep Up?", "year": 2024, "journal": "SSRN", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5019468"}, {"title": "Who Acts When Autonomous Weapons Strike?", "year": 2024, "journal": "Oxford Academic", "url": "https://academic.oup.com/jicj/article/21/5/1033/7591635"}, {"title": "Autonomous Weapons and the Global Majority", "year": 2025, "journal": "Heinrich Böll", "url": "https://us.boell.org/en/2025/07/24/autonomous-weapon-systems-international-law-and-global-majority"}], "5": [{"title": "European Digital Autonomy", "year": 2024, "journal": "EU Cloud/Edge/IoT", "url": "https://eucloudedgeiot.eu/european-digital-autonomy-and-the-future-of-european-competitiveness/"}, {"title": "An Autonomy–Interdependence Governance Gap?", "year": 2025, "journal": "Cogitatio", "url": "https://www.cogitatiopress.com/politicsandgovernance/article/viewFile/10331/4478"}, {"title": "Technology sovereignty as an emerging frame", "year": 2023, "journal": "Research Policy", "url": "https://www.sciencedirect.com/science/article/pii/S0048733323000495"}, {"title": "Technological sovereignty of the EU", "year": 2024, "journal": "EC RTD SRIP", "url": "https://ec.europa.eu/assets/rtd/srip/2024/ec_rtd_srip-report-2024-chap-08.pdf"}, {"title": "Digital Sovereignty and the Political Economy of Technology", "year": 2025, "journal": "OxJournal", "url": "https://www.oxjournal.org/digital-sovereignty-and-the-political-economy-of-technology/"}], "6": [{"title": "Succeeding in the AI competition with China", "year": 2025, "journal": "Brookings", "url": "https://www.brookings.edu/articles/succeeding-in-the-ai-competition-with-china-a-strategy-for-action/"}, {"title": "The Age of AI in U.S.-China Great Power Competition", "year": 2025, "journal": "Beyond the Horizon", "url": "https://behorizon.org/the-age-of-ai-in-u-s-china-great-power-competition-strategic-implications-risks-and-global-governance/"}, {"title": "US-China Strategic Competition on the AI Frontier", "year": 2020, "journal": "SSRN", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3619381"}, {"title": "US-China relations in the age of AI", "year": 2022, "journal": "Brookings", "url": "https://www.brookings.edu/articles/us-china-relations-in-the-age-of-artificial-intelligence/"}, {"title": "AI War Between China and America", "year": 2025, "journal": "SSRN", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5120918"}], "7": [{"title": "AI-tocracy", "year": 2023, "journal": "QJE", "url": "https://academic.oup.com/qje/article/138/3/1349/7076890"}, {"title": "How Authoritarian Value Systems Undermine Global AI Governance", "year": 2024, "journal": "CIGI", "url": "https://www.cigionline.org/publications/how-authoritarian-value-systems-undermine-global-ai-governance/"}, {"title": "Digital Authoritarianism", "year": 2023, "journal": "GCSP", "url": "https://www.gcsp.ch/publications/digital-authoritarianism-how-digital-technologies-can-empower-authoritarianism-and"}, {"title": "The Limits of AI for Authoritarian Control", "year": 2024, "journal": "Eddie Yang", "url": "https://www.eddieyang.net/research/AI_dilemma.pdf"}, {"title": "Using AI as a weapon of repression", "year": 2024, "journal": "European Parliament", "url": "https://www.europarl.europa.eu/thinktank/en/document/EXPO_IDA(2024)754450"}], "8": [{"title": "AI could boost global trade by 40% by 2040", "year": 2025, "journal": "Nation Thailand", "url": "https://www.nationthailand.com/news/world/40055668"}, {"title": "World Trade Report 2025: Making Trade and AI Work", "year": 2025, "journal": "WTO/WITA", "url": "https://www.wita.org/atp-research/wto-report-2025/"}, {"title": "Evaluating the impact of AI on trade", "year": 2025, "journal": "Technological Forecasting & Social Change", "url": "https://www.sciencedirect.com/science/article/pii/S0161893825000699"}, {"title": "AI Will Transform the Global Economy", "year": 2024, "journal": "IMF", "url": "https://www.imf.org/en/Blogs/Articles/2024/01/14/ai-will-transform-the-global-economy-lets-make-sure-it-benefits-humanity"}, {"title": "The Future of Global A.I.", "year": 2025, "journal": "ORF", "url": "https://orfme.org/research/the-future-of-global-a-i/"}], "9": [{"title": "World Trade Report 2025: AI and Trade", "year": 2025, "journal": "WTO/WITA", "url": "https://www.wita.org/atp-research/wto-report-2025/"}, {"title": "AI could boost global trade", "year": 2025, "journal": "Nation Thailand", "url": "https://www.nationthailand.com/news/world/40055668"}, {"title": "Evaluating the impact of AI on trade", "year": 2025, "journal": "Technological Forecasting & Social Change", "url": "https://www.sciencedirect.com/science/article/pii/S0161893825000699"}, {"title": "AI and Diplomacy—International Relations in the Era of Disruptive Technologies", "year": 2025, "journal": "Tech-Diplomacy", "url": "https://tech-diplomacy.com/ai-and-diplomacy-international-relations-in-the-era-of-disruptive-technologies/"}, {"title": "AI Diplomacy", "year": 2023, "journal": "Diplo", "url": "https://www.diplomacy.edu/topics/ai-and-diplomacy/"}], "10": [{"title": "The Impact of AI, Automation, and Robotics on Labor Markets", "year": 2025, "journal": "ASRJETS", "url": "https://asrjetsjournal.org/American_Scientific_Journal/article/view/11881"}, {"title": "AI-Driven Automation And Labor Market Displacement", "year": 2025, "journal": "IJES", "url": "https://theaspd.com/index.php/ijes/article/view/421"}, {"title": "Canaries in the Coal Mine? Six Facts", "year": 2025, "journal": "Stanford Digital Economy Lab", "url": "https://digitaleconomy.stanford.edu/wp-content/uploads/2025/08/Canaries_BrynjolfssonChandarChen.pdf"}, {"title": "How AI impacts the US labor market", "year": 2025, "journal": "MIT Sloan", "url": "https://mitsloan.mit.edu/ideas-made-to-matter/how-artificial-intelligence-impacts-us-labor-market"}, {"title": "Artificial Intelligence and Employment", "year": 2022, "journal": "PMC", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9127971/"}], "11": [{"title": "Strengthening International Cooperation on AI", "year": 2021, "journal": "Brookings", "url": "https://www.brookings.edu/wp-content/uploads/2021/10/Strengthening-International-Cooperation-AI_Oct21.pdf"}, {"title": "Enhancing International Cooperation in AI Research", "year": 2022, "journal": "Stanford HAI", "url": "https://hai.stanford.edu/sites/default/files/2022-05/HAI%20Policy%20White%20Paper%20-%20Enhancing%20International%20Cooperation%20in%20AI%20Research.pdf"}, {"title": "Promoting global cooperation on AI regulation", "year": 2024, "journal": "UN Tech Envoy", "url": "https://www.un.org/digital-emerging-technologies/sites/www.un.org.techenvoy/files/GDC-submission_ART-AI_University-of-Bath.pdf"}, {"title": "Multilateral AI", "year": 2024, "journal": "Init.", "url": "https://multilateral.ai/"}, {"title": "Ethics of Artificial Intelligence (Recommendation)", "year": 2024, "journal": "UNESCO", "url": "https://www.unesco.org/en/artificial-intelligence/recommendation-ethics"}], "12": [{"title": "AI governance and standards", "year": 2025, "journal": "ICC", "url": "https://iccwbo.org/wp-content/uploads/sites/3/2025/07/2025-ICC-Policy-Paper-AI-governance-and-standards.pdf"}, {"title": "A Framework for the International Governance of AI", "year": 2023, "journal": "Carnegie Council", "url": "https://www.carnegiecouncil.org/media/article/a-framework-for-the-international-governance-of-ai"}, {"title": "The Rise of AI Governance: Unpacking ISO/IEC 42001", "year": 2024, "journal": "NSAI", "url": "https://www.nsai.ie/about/news/the-rise-of-ai-governance-unpacking-iso-iec-42001/"}, {"title": "How the ISO and IEC are developing international standards", "year": 2025, "journal": "UNESCO", "url": "https://www.unesco.org/ethics-ai/en/articles/how-iso-and-iec-are-developing-international-standards-responsible-adoption-ai"}, {"title": "Harnessing international standards for responsible AI", "year": 2024, "journal": "ISO", "url": "https://www.iso.org/files/live/sites/isoorg/files/publications/en/PUB100498.pdf"}], "13": [{"title": "EU AI Act Update 2025", "year": 2025, "journal": "TTMS", "url": "https://ttms.com/eu-ai-act-update-2025-code-of-practice-enforcement-industry-reactions/"}, {"title": "EU AI Act 2025 Update: GPAI Rules & Compliance", "year": 2025, "journal": "Nemko", "url": "https://digital.nemko.com/insights/eu-ai-act-rules-on-gpai-2025-update"}, {"title": "AI Act implementation timeline", "year": 2025, "journal": "European Parliament", "url": "https://www.europarl.europa.eu/RegData/etudes/ATAG/2025/772906/EPRS_ATA(2025)772906_EN.pdf"}, {"title": "EU Artificial Intelligence Act Portal", "year": 2025, "journal": "Portal", "url": "https://artificialintelligenceact.eu"}, {"title": "AI Act | Shaping Europe's digital future", "year": 2025, "journal": "European Commission", "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"}], "14": [{"title": "AI Ethics as a Realm of International Cooperation", "year": 2025, "journal": "Global Affairs", "url": "https://eng.globalaffairs.ru/articles/ai-ethics-pomozova-litvak/"}, {"title": "Worldwide AI ethics: A review of 200 guidelines", "year": 2023, "journal": "Patterns", "url": "https://www.sciencedirect.com/science/article/pii/S2666389923002416"}, {"title": "The Importance of International Norms in AI Ethics", "year": 2022, "journal": "CFR", "url": "https://www.cfr.org/blog/importance-international-norms-artificial-intelligence-ethics"}, {"title": "International: Can a global framework regulate AI Ethics?", "year": 2023, "journal": "Baker McKenzie", "url": "https://insightplus.bakermckenzie.com/bm/investigations-compliance-ethics/international-can-a-global-framework-regulate-ai-ethics"}, {"title": "Ethics of Artificial Intelligence (UNESCO)", "year": 2024, "journal": "UNESCO", "url": "https://www.unesco.org/en/artificial-intelligence/recommendation-ethics"}], "15": [{"title": "The Global Struggle Over AI Surveillance", "year": 2022, "journal": "NED", "url": "https://www.ned.org/wp-content/uploads/2022/06/Global-Struggle-Over-AI-Surveillance-Feldstein.pdf"}, {"title": "Navigating the Intersection of AI, Surveillance, and Privacy", "year": 2024, "journal": "UN SDGs", "url": "https://sdgs.un.org/sites/default/files/2024-05/Francis_Navigating%20the%20Intersection%20of%20AI,%20Surveillance,%20and%20Privacy.pdf"}, {"title": "Geopolitical implications of AI and digital surveillance adoption", "year": 2022, "journal": "Brookings", "url": "https://www.brookings.edu/articles/geopolitical-implications-of-ai-and-digital-surveillance-adoption/"}, {"title": "AI surveillance: Reclaiming privacy through informational control", "year": 2024, "journal": "SAGE", "url": "https://journals.sagepub.com/doi/10.1177/20319525241306327"}, {"title": "How AI can enable public surveillance", "year": 2025, "journal": "Brookings", "url": "https://www.brookings.edu/articles/how-ai-can-enable-public-surveillance/"}], "16": [{"title": "Key human rights challenges of AI", "year": 2025, "journal": "ENNHRI", "url": "https://ennhri.org/ai-resource/key-human-rights-challenges/"}, {"title": "AI, Big Data, and Accountability", "year": 2025, "journal": "HR Research", "url": "https://www.humanrightsresearch.org/post/harnessing-technology-to-safeguard-human-rights-ai-big-data-and-accountability"}, {"title": "Digital Rights and AI: can the EU protect human rights", "year": 2025, "journal": "GC Human Rights", "url": "https://www.gchumanrights.org/preparedness/digital-rights-and-ai-can-the-eu-protect-human-rights-in-the-age-of-artificial-intelligence/"}, {"title": "Artificial intelligence and human rights: What is the EU's ...", "year": 2022, "journal": "Digital Law Journal", "url": "https://www.digitallawjournal.org/jour/article/view/116"}, {"title": "OHCHR and privacy in the digital age", "year": 2004, "journal": "OHCHR", "url": "https://www.ohchr.org/en/privacy-in-the-digital-age"}], "17": [{"title": "Artificial Intelligence for Climate Action in Developing Countries", "year": 2024, "journal": "UNFCCC", "url": "https://unfccc.int/ttclear/misc_/StaticFiles/gnwoerk_static/AI4climateaction/28da5d97d7824d16b7f68a225c0e3493/a4553e8f70f74be3bc37c929b73d9974.pdf"}, {"title": "Aligning AI and Climate Governance", "year": 2025, "journal": "UNU-EHS", "url": "https://unu.edu/ehs/commentary/aligning-ai-and-climate-governance"}, {"title": "How AI Is Discussed in International Environmental Negotiations", "year": 2025, "journal": "Oxford Academic", "url": "https://academic.oup.com/edited-volume/59762/chapter/508605346"}, {"title": "The intersection of climate technology and public diplomacy", "year": 2025, "journal": "ScienceDirect", "url": "https://www.sciencedirect.com/science/article/pii/S2666188825000358"}, {"title": "Responding to Climate Change Using AI", "year": 2023, "journal": "IRPJ", "url": "https://irpj.euclid.int/articles/responding-to-climate-change-using-artificial-intelligence-and-machine-learning-the-need-for-legal-and-regulatory-guardrails/"}], "18": [{"title": "AI-driven disinformation: policy recommendations", "year": 2025, "journal": "PMC", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12351547/"}, {"title": "Addressing the Societal Impact of Deepfakes in Low-Tech ...", "year": 2023, "journal": "arXiv", "url": "https://arxiv.org/html/2508.16618v1"}, {"title": "Deepfakes and international conflict", "year": 2022, "journal": "Brookings", "url": "https://www.brookings.edu/articles/deepfakes-and-international-conflict/"}, {"title": "Risks and benefits of artificial intelligence deepfakes", "year": 2025, "journal": "ScienceDirect", "url": "https://www.sciencedirect.com/science/article/pii/S2444569X25001271"}, {"title": "Deepfakes and the crisis of knowing", "year": 2025, "journal": "UNESCO", "url": "https://www.unesco.org/en/articles/deepfakes-and-crisis-knowing"}], "19": [{"title": "The Role of AI in Cyber Espionage Attacks", "year": 2024, "journal": "IJFMR", "url": "https://www.ijfmr.com/papers/2024/6/31141.pdf"}, {"title": "Artificial Intelligence: Information Theft and Cyber Espionage", "year": 2024, "journal": "SSRN", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4903740"}, {"title": "AI and Espionage: Espionage in a Developing Age", "year": 2024, "journal": "Grey Dynamics", "url": "https://greydynamics.com/ai-and-espionage-espionage-in-a-developing-age/"}, {"title": "Impacts Of Strategic Partnership On Technological ...", "year": 2024, "journal": "Texila", "url": "https://www.texilajournal.com/thumbs/article/Management_Vol%2010_Issue%201_Article_8.pdf"}, {"title": "National Security During the First AI Revolution", "year": 2024, "journal": "Wiley", "url": "https://onlinelibrary.wiley.com/doi/10.1111/capa.70020"}], "20": [{"title": "Strategic Alliances for Technology Adoption", "year": 2024, "journal": "PDXScholar", "url": "https://pdxscholar.library.pdx.edu/context/etm_fac/article/1225/viewcontent/Strategic_Alliances_for_Technology_Adoption_Alliances_and_Partnerships_for_Blockchain_Adoption.pdf"}, {"title": "Impacts Of Strategic Partnership On Technological ...", "year": 2024, "journal": "Texila", "url": "https://www.texilajournal.com/thumbs/article/Management_Vol%2010_Issue%201_Article_8.pdf"}, {"title": "Strategic Alliance Research in the Era of Digital ...", "year": 2020, "journal": "Coventry", "url": "https://pureportal.coventry.ac.uk/files/29881612/Binder1.pdf"}, {"title": "Alliances and digital transformation are crucial", "year": 2024, "journal": "ScienceDirect", "url": "https://www.sciencedirect.com/science/article/pii/S0925527324000239"}, {"title": "Navigating Tech Alliance Leadership", "year": 2024, "journal": "ISTO", "url": "https://isto.org/isto-blog/tech-alliance-leadership/"}], "21": [{"title": "The 'AI divide' between the Global North and Global South", "year": 2025, "journal": "WEF", "url": "https://www.weforum.org/stories/2023/01/davos23-ai-divide-global-north-global-south/"}, {"title": "Artificial Intelligence & the Global South", "year": 2024, "journal": "SSRN", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4866372"}, {"title": "AI's Unequal Revolution: Bridging the Global Divide", "year": 2025, "journal": "KSAPA", "url": "https://ksapa.org/ais-unequal-revolution-bridging-the-global-divide/"}, {"title": "From Divide to Delivery: How AI Can Serve the Global South", "year": 2025, "journal": "CSIS", "url": "https://www.csis.org/analysis/divide-delivery-how-ai-can-serve-global-south"}, {"title": "Mind the AI Divide", "year": 2024, "journal": "UN Tech Envoy", "url": "https://www.un.org/digital-emerging-technologies/sites/www.un.org.techenvoy/files/MindtheAIDivide.pdf"}], "22": [{"title": "The Future of the Quad's Technology Cooperation", "year": 2022, "journal": "CFR", "url": "https://www.cfr.org/blog/future-quads-technology-cooperation-hangs-balance"}, {"title": "Quad AI", "year": 2023, "journal": "CSET", "url": "https://cset.georgetown.edu/publication/quad-ai/"}, {"title": "The Quad's steady resolve: Blueprint for Indo-Pacific", "year": 2025, "journal": "PacForum", "url": "https://pacforum.org/publications/pacnet-57-the-quads-steady-resolve-a-blueprint-for-indo-pacific-stability/"}, {"title": "No AI Without Power: Why the Quad Must Secure ...", "year": 2025, "journal": "CSIS", "url": "https://www.csis.org/analysis/no-ai-without-power-why-quad-must-secure-power-equipment-supply-chains"}, {"title": "Trump 2.0 and AI: Indo-Pacific and the Quad", "year": 2025, "journal": "Modern Diplomacy", "url": "https://moderndiplomacy.eu/2025/05/02/trump-2-0-and-ai-whats-at-stake-for-the-indo-pacific-and-the-quad/"}], "23": [{"title": "Russia's securitised approach to AI sovereignty", "year": 2025, "journal": "AJIC", "url": "https://ajic.wits.ac.za/article/view/20626"}, {"title": "Russia Bets on 'Sovereign AI'", "year": 2025, "journal": "United24Media", "url": "https://united24media.com/latest-news/russia-bets-on-sovereign-ai-12765"}, {"title": "Russia Updates National AI Strategy", "year": 2025, "journal": "BABL AI", "url": "https://babl.ai/russia-updates-national-ai-strategy/"}, {"title": "Developing Artificial Intelligence in Russia", "year": 2020, "journal": "Carnegie", "url": "https://carnegie.ru/commentary/82422"}, {"title": "Large AI Spaces and Russia's Strategy", "year": 2022, "journal": "RUDN", "url": "https://journals.rudn.ru/international-relations/article/view/31406"}], "24": [{"title": "Putin orders AI cooperation with China", "year": 2025, "journal": "Reuters", "url": "https://www.reuters.com/technology/artificial-intelligence/putin-orders-russian-government-top-bank-develop-ai-cooperation-with-china-2025-01-01/"}, {"title": "Russia and China eye AI partnership", "year": 2025, "journal": "TV BRICS", "url": "https://tvbrics.com/en/news/russia-and-china-eye-ai-as-key-area-for-partnership/"}, {"title": "China and Russia can lead way in AI", "year": 2025, "journal": "China Daily", "url": "https://regional.chinadaily.com.cn/wic/2025-09/10/c_1123901.htm"}, {"title": "China-Russia Cooperation in the AI Era", "year": 2025, "journal": "Valdai", "url": "https://valdaiclub.com/a/highlights/china-russian-cooperation-in-the-ai-era/"}, {"title": "China, Russia support UN's central role in AI governance", "year": 2025, "journal": "Xinhua", "url": "https://eng.yidaiyilu.gov.cn/p/04EG7OA2.html"}], "25": [{"title": "BRICS AI Governance Declaration 2025", "year": 2025, "journal": "Nemko", "url": "https://digital.nemko.com/news/brics-ai-governance-declaration-2025"}, {"title": "Russia aims to ride the BRICS to AI victory", "year": 2025, "journal": "FDD", "url": "https://www.fdd.org/analysis/op_eds/2025/06/05/russia-aims-to-ride-the-brics-to-ai-victory/"}, {"title": "BRICS Leaders: Governance rooted in sovereignty", "year": 2025, "journal": "BABL AI", "url": "https://babl.ai/brics-leaders-call-for-global-ai-governance-rooted-in-sovereignty-equity-and-south-south-cooperation/"}, {"title": "BRICS Sets Direction", "year": 2025, "journal": "BRICS Bridge", "url": "https://bricsbridge.com/news/brics-ai-governance-framework/"}, {"title": "AI Governance in BRICS", "year": 2025, "journal": "BRICS", "url": "https://brics.br/en/news/articles/artificial-intelligence-governance-in-brics-cooperation-and-development-for-social-inclusion"}]};
+const canvas = document.getElementById('network-canvas');
+const ctx = canvas.getContext('2d');
+const list = document.getElementById('cluster-list');
+const backBtn = document.getElementById('back-btn');
+const tooltip = document.getElementById('tooltip');
+let W,H,zoom=1,panX=0,panY=0,isDrag=false,sx=0,sy=0,selected=null, hoveredNode = null;
+
+function resize(){
+    W=canvas.width=canvas.parentElement.clientWidth;
+    H=canvas.height=canvas.parentElement.clientHeight;
+    if(panX===0&&panY===0){ panX=W/2-400; panY=H/2-300; }
+    draw();
+}
+window.addEventListener('resize',resize); resize();
+
+canvas.addEventListener('mousedown',e=>{
+    isDrag=true; sx=e.clientX-panX; sy=e.clientY-panY;
+});
+canvas.addEventListener('mousemove',e=>{ 
+    if(isDrag){
+        panX=e.clientX-sx; panY=e.clientY-sy; draw(); 
+    } else {
+        const r=canvas.getBoundingClientRect(), x=(e.clientX-r.left-panX)/zoom, y=(e.clientY-r.top-panY)/zoom;
+        hoveredNode = clusters.find(n=>Math.hypot(x-n.x,y-n.y)<n.size);
+        updateTooltip(hoveredNode);
+        draw();
+    }
+});
+canvas.addEventListener('mouseup',()=>isDrag=false);
+canvas.addEventListener('mouseleave',()=>{
+    isDrag=false;
+    hoveredNode = null;
+    updateTooltip(null);
+    draw();
+});
+canvas.addEventListener('wheel',e=>{
+    const d=e.deltaY>0?0.9:1.1, old=zoom;
+    zoom=Math.max(.3,Math.min(3,zoom*d));
+    const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    panX=mx-(mx-panX)*(zoom/old); panY=my-(my-panY)*(zoom/old); draw();
+});
+
+canvas.addEventListener('click',e=>{
+    const r=canvas.getBoundingClientRect(), x=(e.clientX-r.left-panX)/zoom, y=(e.clientY-r.top-panY)/zoom;
+    const hit = clusters.find(n=>Math.hypot(x-n.x,y-n.y)<n.size);
+    select(hit||null);
+});
+
+document.getElementById('zoom-in').onclick = ()=>{ zoom=Math.min(3,zoom*1.2); draw(); };
+document.getElementById('zoom-out').onclick = ()=>{ zoom=Math.max(0.3,zoom/1.2); draw(); };
+document.getElementById('reset').onclick = ()=>{
+    zoom=1; panX=W/2-400; panY=H/2-300;
+    select(null);
+    draw();
+};
+
+function updateTooltip(node) {
+    if(node) {
+        tooltip.querySelector('.tooltip-title').textContent = node.label;
+        tooltip.querySelector('.tooltip-papers').textContent = node.papers+' публикаций' + (node.isRussia?' · ★ Российская':'');
+        tooltip.classList.add('visible');
+    } else {
+        tooltip.classList.remove('visible');
+    }
+}
+
+function select(node){
+    selected=node; renderList(); draw();
+}
+
+function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.save(); ctx.translate(panX,panY); ctx.scale(zoom,zoom);
+    // edges
+    connections.forEach(c=>{
+        const a=clusters.find(x=>x.id===c.from), b=clusters.find(x=>x.id===c.to);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle='rgba(148,163,184,'+(0.09+c.weight*0.09)+')';
+        ctx.lineWidth=c.weight*0.6;
+        ctx.stroke();
+    });
+    // nodes
+    clusters.forEach(n=>{
+        let opacity = 1; let shouldHighlight = false;
+        if(selected) {
+            shouldHighlight = (selected.id===n.id || connections.some(c=>(c.from===selected.id&&c.to===n.id)||(c.to===selected.id&&c.from===n.id)));
+            opacity = selected && !shouldHighlight ? 0.3 : 1;
+        }
+        // glow
+        if ((hoveredNode && hoveredNode.id === n.id) || (shouldHighlight && opacity === 1)) {
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.size+8, 0, Math.PI*2);
+            const gradient = ctx.createRadialGradient(n.x, n.y, n.size, n.x, n.y, n.size+8);
+            gradient.addColorStop(0, n.color+'60'); gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient; ctx.globalAlpha = 0.7 * opacity;
+            ctx.fill(); ctx.globalAlpha = 1.0;
+        }
+        ctx.beginPath(); ctx.arc(n.x,n.y,n.size,0,Math.PI*2);
+        ctx.fillStyle=n.color; ctx.globalAlpha = opacity;
+        ctx.fill(); ctx.globalAlpha=1.0;
+        if(selected && n.id===selected.id){
+            ctx.save();ctx.beginPath();ctx.arc(n.x,n.y,n.size+3,0,Math.PI*2);
+            ctx.lineWidth=5;ctx.strokeStyle='#fff';
+            ctx.shadowColor=n.color;ctx.shadowBlur=13;
+            ctx.stroke();ctx.restore();
+        }
+        if(n.isRussia){ ctx.fillStyle='#fff'; ctx.font='bold 16px sans-serif'; ctx.fillText('★', n.x-7, n.y-n.size-22); }
+        ctx.save(); ctx.font='15px sans-serif'; ctx.textAlign='center';
+        let metrics = ctx.measureText(n.label), textHeight = 18;
+        ctx.fillStyle = `rgba(15,23,42,${0.88 * opacity})`;
+        ctx.fillRect(n.x-(metrics.width/2)-4,n.y-n.size-textHeight-4,metrics.width+8,textHeight+4);
+        ctx.restore();
+        ctx.fillStyle='#fff'; ctx.font='15px sans-serif'; ctx.textAlign='center';
+        ctx.fillText(n.label, n.x, n.y-n.size-8);
+    });
+    ctx.restore();
+}
+
+function renderList(){
+    list.innerHTML='';
+    if(selected){
+        backBtn.classList.add('visible');
+        const h=document.createElement('div');
+        h.className="cluster-list-title";
+        h.textContent='Связанные области исследований';
+        list.appendChild(h);
+        const neigh = connections.filter(c=>c.from===selected.id||c.to===selected.id)
+            .map(c=>({node:clusters.find(n=>n.id===(c.from===selected.id?c.to:c.from)), w:c.weight}))
+            .sort((a,b)=>b.w-a.w);
+        neigh.forEach(({node,w})=>{
+            // Элемент с цветным кругом и количеством публикаций
+            const item=document.createElement('div'); item.className='connection-item';
+            const connInfo=document.createElement('div');connInfo.className='conn-info';
+            const icon=document.createElement('span');icon.className='conn-icon';icon.style.background=node.color;
+            connInfo.appendChild(icon);
+            const nametxt=document.createElement('span');nametxt.textContent=node.label;
+            if(node.isRussia){
+                const star=document.createElement('span');star.className='cluster-star';star.textContent='*';
+                star.title='Российская тема';nametxt.appendChild(star);
+            }
+            connInfo.appendChild(nametxt);
+            // количество публикаций (в цвете кластера)
+            const pub=document.createElement('span');pub.className='conn-pubcount';pub.textContent=node.papers;
+            pub.style.background=node.color; pub.style.color='#fff';
+            connInfo.appendChild(pub);
+            item.appendChild(connInfo);
+
+            // индикаторы силы связи (точки)
+            const strength=document.createElement('div'); strength.className='connection-strength';
+            for(let i=0;i<w;i++){
+                const dot=document.createElement('div'); dot.className='strength-dot'; strength.appendChild(dot);
+            }
+            item.appendChild(strength);
+
+            item.onclick=()=>select(node); // теперь клик — переходим на выбранный кластер!
+            list.appendChild(item);
+        });
+        // публикации по теме
+        if(publications[selected.id]){
+            const ph=document.createElement('div');
+            ph.className = 'publications-section';
+            ph.style.margin='14px 0 6px'; ph.style.fontWeight='bold';
+            ph.textContent='Ключевые публикации'; list.appendChild(ph);
+            publications[selected.id].forEach(pub=>{
+                const it=document.createElement('div'); it.className='publication-item';
+                const t=document.createElement('div');
+                t.style.fontWeight='600'; t.textContent=pub.title; it.appendChild(t);
+                const m=document.createElement('div');
+                m.style.fontSize='12px'; m.style.display='flex'; m.style.gap='10px';
+                const y=document.createElement('span'); y.textContent=pub.year;
+                const j=document.createElement('span'); j.textContent=pub.journal;
+                const a=document.createElement('a'); a.href=pub.url; a.target='_blank'; a.rel='noopener noreferrer'; a.className='publication-link'; a.textContent='Открыть →';
+                m.appendChild(y); m.appendChild(j); m.appendChild(a); it.appendChild(m); list.appendChild(it);
+            });
+        }
+    }else{
+        backBtn.classList.remove('visible');
+        clusters.forEach(n=>{
+            const it=document.createElement('div');
+            it.className='cluster-item'+(n.isRussia?' russia-related':'')+(selected&&selected.id===n.id?' selected':'');
+            const icon=document.createElement('span');
+            icon.className='cluster-icon';
+            icon.style.background=n.color;
+            it.appendChild(icon);
+            const nametxt = document.createElement('span');
+            nametxt.textContent = n.label;
+            if(n.isRussia){nametxt.innerHTML += ' <span class="cluster-star" title="Российская тема">*</span>';}
+            it.appendChild(nametxt);
+            const cc = document.createElement('span');
+            cc.className='cluster-pubcount';
+            cc.textContent=n.papers;
+            cc.style.background=n.color; cc.style.color='#fff';
+            it.appendChild(cc);
+            it.onclick=()=>select(n); list.appendChild(it);
+        });
+    }
+}
+backBtn.addEventListener('click', ()=>select(null));
+renderList(); draw();
+</script>
+</body>
+</html>
