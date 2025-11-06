@@ -41,42 +41,35 @@ h1 {
 .legend-circle { width: 13px; height: 13px; border-radius: 50%; display: inline-block; margin-right: 3px; }
 #main-container {
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 120px);  /* КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ! */
   overflow: hidden;
 }
-#canvas-container {
-  flex: 1;
-  position: relative;
-  min-width: 240px;
-}
+
 #sidebar {
   display: grid;
   grid-template-rows: min-content min-content 1fr min-content;
-  height: 100vh;
+  height: 100%;  /* ИЗМЕНИТЕ с 100vh на 100% */
   font-size: 13px;
-  padding: 12px 12px 24px 12px; /* ИЗМЕНИТЕ: добавьте 24px снизу */
+  padding: 12px;
   width: 340px;
   min-width: 200px;
   background: rgba(30,41,59,0.95);
   box-sizing: border-box;
   color: #e2e8f0;
-  overflow: hidden; /* ДОБАВЬТЕ */
 }
 
 #cluster-list {
-  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: 20px; /* УВЕЛИЧЬТЕ до 20px */
-  margin-bottom: 12px; /* ДОБАВЬТЕ */
+  padding-bottom: 16px;
 }
 
 .publications-section {
   max-height: 220px;
   overflow-y: auto;
-  padding-bottom: 20px; /* УВЕЛИЧЬТЕ до 20px */
-  margin-bottom: 12px; /* ДОБАВЬТЕ */
+  padding-bottom: 16px;
 }
+
 
 /* Для последнего элемента в списке */
 .cluster-item:last-child,
