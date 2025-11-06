@@ -62,15 +62,13 @@ h1 {
   color: #e2e8f0;
 }
 #cluster-list {
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
 .publications-section {
-  max-height: 140px;
+  max-height: 220px;
   overflow-y: auto;
-  margin-top: 9px;
-  font-size: 12px;
-  padding: 10px 7px;
 }
 .sidebar-title { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
 .cluster-list-title { font-size: 12px; margin-bottom: 5px; color: #94a3b8; }
@@ -441,16 +439,15 @@ function resetClusterPositions() {
 }
     
     
-const clusterList = document.getElementById('cluster-list');          // scroll только для кластеров
+const clusterList = document.getElementById('cluster-list');    // scroll только для кластеров
 const publicationsSection = document.querySelector('.publications-section'); // scroll только для публикаций/связей
 const backBtn = document.getElementById('back-btn');
 
 function renderList() {
-  // Очищаем оба блока
   clusterList.innerHTML = '';
   publicationsSection.innerHTML = '';
 
-  // 1. Рендерим ВСЕ кластеры (только сюда!)
+  // Рендерим только кластеры, никаких публикаций/связей
   clusters.forEach(n => {
     const it = document.createElement('div');
     it.className = 'cluster-item' + (n.isRussia ? ' russia-related' : '') + (selected && selected.id === n.id ? ' selected' : '');
@@ -482,7 +479,7 @@ function renderList() {
     clusterList.appendChild(it);
   });
 
-  // 2. Публикации и связи (только сюда!)
+  // В publicationsSection — только связи и публикации
   if (selected) {
     backBtn.classList.add('visible');
 
@@ -535,14 +532,14 @@ function renderList() {
       item.appendChild(strength);
 
       item.onclick = () => select(node);
-      publicationsSection.appendChild(item); // !!! В publicationsSection
+      publicationsSection.appendChild(item); // Только сюда!
     });
 
     // Публикации
     if (publications[selected.id]) {
       const ph = document.createElement('div');
       ph.className = 'publications-section-title';
-      ph.style.margin = '10px 0 6px';
+      ph.style.margin = '8px 0 6px';
       ph.style.fontWeight = 'bold';
       ph.textContent = 'Публикации по выбранной теме';
       publicationsSection.appendChild(ph);
@@ -578,7 +575,7 @@ function renderList() {
         m.appendChild(a);
 
         it.appendChild(m);
-        publicationsSection.appendChild(it); // !!! В publicationsSection
+        publicationsSection.appendChild(it);
       });
     }
   } else {
