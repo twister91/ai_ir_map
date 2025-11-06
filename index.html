@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI & Международные отношения - Расширенная карта</title>
 <style>
-body {font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;overflow:hidden;}
+body {font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;overflow:auto;}
 header {background:rgba(30,41,59,0.95);border-bottom:2px solid #334155;padding:20px 30px;box-shadow:0 4px 6px rgba(0,0,0,0.3);}
 h1 {font-size:28px;font-weight:700;color:#f1f5f9;margin-bottom:8px;}
 .subtitle {font-size:14px;color:#94a3b8;}
@@ -14,7 +14,7 @@ h1 {font-size:28px;font-weight:700;color:#f1f5f9;margin-bottom:8px;}
 .legend-item {display:flex;align-items:center;gap:6px;font-size:14px;}
 .legend-star {color:#c026d3;font-weight:bold;margin-right:3px;font-size:17px;}
 .legend-circle {width:17px;height:17px;border-radius:50%;display:inline-block;margin-right:4px;}
-#main-container {display:flex;height:calc(150vh - 150px);}
+#main-container {display:flex;height:100vh;}
 #canvas-container {flex:1;position:relative;overflow:visible;min-width:320px;}
 #sidebar {
     width:400px;
@@ -27,7 +27,7 @@ h1 {font-size:28px;font-weight:700;color:#f1f5f9;margin-bottom:8px;}
     display:flex;
     flex-direction:column;
     height:auto;
-    max-height:none; 
+    max-height:100vh; 
 }
 #cluster-list {
     flex:1 1 auto;
