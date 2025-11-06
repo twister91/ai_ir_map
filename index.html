@@ -6,15 +6,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI & Международные отношения - Расширенная карта</title>
 <style>
+:root {
+  /* Светлая тема */
+  --bg-gradient-1: #f8fafc;
+  --bg-gradient-2: #e2e8f0;
+  --header-bg: rgba(226, 232, 240, 0.95);
+  --text-color: #1e293b;
+  --border-color: #cbd5e1;
+  --canvas-bg: #ffffff;
+}
+
+body.dark-theme {
+  /* Темная тема (текущая) */
+  --bg-gradient-1: #0f172a;
+  --bg-gradient-2: #1e293b;
+  --header-bg: rgba(30, 41, 59, 0.95);
+  --text-color: #e2e8f0;
+  --border-color: #334155;
+  --canvas-bg: #0f172a;
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
-  color: #e2e8f0;
+  background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+  color: var(--text-color);
   margin: 0;
 }
 header {
-  background: rgba(30,41,59,0.95);
-  border-bottom: 2px solid #334155;
+  background: var(--header-bg);
+  border-bottom: 2px solid var(--border-color);
   padding: 20px 30px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
@@ -158,6 +177,7 @@ canvas:active { cursor: grabbing; }
       <span class="legend-item"><span class="legend-star">*</span>Российские темы</span>
       <span class="legend-item">Толщина линии = сила связи</span>
       <span class="legend-item">Размер кружка = публикаций</span>
+      <button id="theme-toggle" class="control-btn" style="margin-left:auto">☀️</button>
     </div>
 </header>
 <div id="main-container">
@@ -173,7 +193,7 @@ canvas:active { cursor: grabbing; }
             <div class="tooltip-papers"></div>
             <div class="tooltip-hint">Нажмите для подробностей</div>
         </div>
-        <div id="desc-popup" style="display:none;position:absolute;right:60px;top:20px;z-index:20;max-width:350px;min-width:210px;background:rgba(30,41,59,.98);color:#fff;border-radius:18px;border:1.5px solid #3b82f6;box-shadow:0 8px 22px rgba(59,130,246,0.14);padding:18px 22px 12px 22px;"></div>
+        <div id="desc-popup" style="display:none;position:absolute;right:80px;top:20px;z-index:20;max-width:350px;min-width:210px;background:rgba(30,41,59,.98);color:#fff;border-radius:18px;border:1.5px solid #3b82f6;box-shadow:0 8px 22px rgba(59,130,246,0.14);padding:18px 22px 12px 22px;"></div>
     </div>
     <div id="sidebar">
         <button id="back-btn" class="back-btn">← Назад к обзору</button>
@@ -260,7 +280,7 @@ const ctx = canvas.getContext('2d');
 const list = document.getElementById('cluster-list');
 const backBtn = document.getElementById('back-btn');
 const tooltip = document.getElementById('tooltip');
-let W,H,zoom=1,panX=0,panY=0,isDrag=false,sx=0,sy=0,selected=null, hoveredNode = null;
+let W,H,zoom=0.6,panX=0,panY=0,isDrag=false,sx=0,sy=0,selected=null, hoveredNode = null;
 let draggingNode = null;
 let dragOffsetX = 0, dragOffsetY = 0;
 
@@ -388,6 +408,30 @@ backBtn.addEventListener('click', ()=>{
     draw();
 });
 
+// Переключатель темы
+const themeToggle = document.getElementById('theme-toggle');
+const body = document.body;
+
+// Загрузка сохраненной темы
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+  body.classList.remove('dark-theme');
+  themeToggle.textContent = '🌙';
+} else {
+  body.classList.add('dark-theme');
+  themeToggle.textContent = '☀️';
+}
+
+// Переключение темы
+themeToggle.addEventListener('click', () => {
+  body.classList.toggle('dark-theme');
+  const isDark = body.classList.contains('dark-theme');
+  themeToggle.textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  draw(); // перерисовать canvas
+});
+
+  
 function updateTooltip(node) {
     if(node) {
         tooltip.querySelector('.tooltip-title').textContent = node.label;
