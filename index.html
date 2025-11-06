@@ -431,84 +431,143 @@ function resetClusterPositions() {
 }
     
     
-function renderList(){
-    list.innerHTML='';
-    if(selected){
-        backBtn.classList.add('visible');
-        const h=document.createElement('div');
-        h.className="cluster-list-title";
-        h.textContent='Связанные области исследований';
-        list.appendChild(h);
-        const neigh = connections.filter(c=>c.from===selected.id||c.to===selected.id)
-            .map(c=>({node:clusters.find(n=>n.id===(c.from===selected.id?c.to:c.from)), w:c.weight}))
-            .sort((a,b)=>b.w-a.w);
-        neigh.forEach(({node,w})=>{
-            // Элемент с цветным кругом и количеством публикаций
-            const item=document.createElement('div'); item.className='connection-item';
-            const connInfo=document.createElement('div');connInfo.className='conn-info';
-            const icon=document.createElement('span');icon.className='conn-icon';icon.style.background=node.color;
-            connInfo.appendChild(icon);
-            const nametxt=document.createElement('span');nametxt.textContent=node.label;
-            if(node.isRussia){
-                const star=document.createElement('span');star.className='cluster-star';star.textContent='*';
-                star.title='Российская тема';nametxt.appendChild(star);
-            }
-            connInfo.appendChild(nametxt);
-            // количество публикаций (в цвете кластера)
-            const pub=document.createElement('span');pub.className='conn-pubcount';pub.textContent=node.papers;
-            pub.style.background=node.color; pub.style.color='#fff';
-            connInfo.appendChild(pub);
-            item.appendChild(connInfo);
+function renderList() {
+  list.innerHTML = "";
 
-            // индикаторы силы связи (точки)
-            const strength=document.createElement('div'); strength.className='connection-strength';
-            for(let i=0;i<w;i++){
-                const dot=document.createElement('div'); dot.className='strength-dot'; strength.appendChild(dot);
-            }
-            item.appendChild(strength);
+  // 1. Сначала рендерим все кластеры (чтобы они шли вначале и всегда были видимы)
+  clusters.forEach(n => {
+    const it = document.createElement('div');
+    it.className = 'cluster-item' + (n.isRussia ? ' russia-related' : '') + (selected && selected.id === n.id ? ' selected' : '');
 
-            item.onclick=()=>select(node); // теперь клик — переходим на выбранный кластер!
-            list.appendChild(item);
-        });
-        // публикации по теме
-        if(publications[selected.id]){
-            const ph=document.createElement('div');
-            ph.className = 'publications-section';
-            ph.style.margin='14px 0 6px'; ph.style.fontWeight='bold';
-            ph.textContent='Ключевые публикации'; list.appendChild(ph);
-            publications[selected.id].forEach(pub=>{
-                const it=document.createElement('div'); it.className='publication-item';
-                const t=document.createElement('div');
-                t.style.fontWeight='600'; t.textContent=pub.title; it.appendChild(t);
-                const m=document.createElement('div');
-                m.style.fontSize='12px'; m.style.display='flex'; m.style.gap='10px';
-                const y=document.createElement('span'); y.textContent=pub.year;
-                const j=document.createElement('span'); j.textContent=pub.journal;
-                const a=document.createElement('a'); a.href=pub.url; a.target='_blank'; a.rel='noopener noreferrer'; a.className='publication-link'; a.textContent='Открыть →';
-                m.appendChild(y); m.appendChild(j); m.appendChild(a); it.appendChild(m); list.appendChild(it);
-            });
-        }
-    }else{
-        backBtn.classList.remove('visible');
-        clusters.forEach(n=>{
-            const it=document.createElement('div');
-            it.className='cluster-item'+(n.isRussia?' russia-related':'')+(selected&&selected.id===n.id?' selected':'');
-            const icon=document.createElement('span');
-            icon.className='cluster-icon';
-            icon.style.background=n.color;
-            it.appendChild(icon);
-            const nametxt = document.createElement('span');
-            nametxt.textContent = n.label;
-            if(n.isRussia){nametxt.innerHTML += ' <span class="cluster-star" title="Российская тема">*</span>';}
-            it.appendChild(nametxt);
-            const cc = document.createElement('span');
-            cc.className='cluster-pubcount';
-            cc.textContent=n.papers;
-            cc.style.background=n.color; cc.style.color='#fff';
-            it.appendChild(cc);
-            it.onclick=()=>select(n); list.appendChild(it);
-        });
+    const icon = document.createElement('span');
+    icon.className = 'cluster-icon';
+    icon.style.background = n.color;
+    it.appendChild(icon);
+
+    const nametxt = document.createElement('span');
+    nametxt.textContent = n.label;
+
+    if (n.isRussia) {
+      const star = document.createElement('span');
+      star.className = 'cluster-star';
+      star.textContent = '*';
+      star.title = 'Российская тема';
+      nametxt.appendChild(star);
     }
+    it.appendChild(nametxt);
+
+    const cc = document.createElement('span');
+    cc.className = 'cluster-pubcount';
+    cc.textContent = n.papers;
+    cc.style.background = n.color;
+    cc.style.color = '#fff';
+    it.appendChild(cc);
+
+    it.onclick = () => select(n);
+    list.appendChild(it);
+  });
+
+  if (selected) {
+    backBtn.classList.add('visible');
+
+    // 2. Связанные кластеры (связи)
+    const neigh = connections.filter(c =>
+      c.from === selected.id || c.to === selected.id
+    ).map(c => {
+      const node = clusters.find(n => n.id === (c.from === selected.id ? c.to : c.from));
+      return { node, w: c.weight };
+    }).sort((a, b) => b.w - a.w);
+
+    neigh.forEach(({node, w}) => {
+      const item = document.createElement('div');
+      item.className = 'connection-item';
+
+      const connInfo = document.createElement('div');
+      connInfo.className = 'conn-info';
+
+      const icon = document.createElement('span');
+      icon.className = 'conn-icon';
+      icon.style.background = node.color;
+      connInfo.appendChild(icon);
+
+      const nametxt = document.createElement('span');
+      nametxt.textContent = node.label;
+      if (node.isRussia) {
+        const star = document.createElement('span');
+        star.className = 'cluster-star';
+        star.textContent = '*';
+        star.title = 'Российская тема';
+        nametxt.appendChild(star);
+      }
+      connInfo.appendChild(nametxt);
+
+      const pub = document.createElement('span');
+      pub.className = 'conn-pubcount';
+      pub.textContent = node.papers;
+      pub.style.background = node.color;
+      pub.style.color = '#fff';
+      connInfo.appendChild(pub);
+      item.appendChild(connInfo);
+
+      const strength = document.createElement('div');
+      strength.className = 'connection-strength';
+      for (let i = 0; i < w; ++i) {
+        const dot = document.createElement('div');
+        dot.className = 'strength-dot';
+        strength.appendChild(dot);
+      }
+      item.appendChild(strength);
+
+      item.onclick = () => select(node);
+      list.appendChild(item);
+    });
+
+    // 3. Публикации по выбранному кластеру
+    if (publications[selected.id]) {
+      const ph = document.createElement('div');
+      ph.className = 'publications-section';
+      ph.style.margin = '14px 0 6px';
+      ph.style.fontWeight = 'bold';
+      ph.textContent = 'Публикации по выбранной теме';
+      list.appendChild(ph);
+
+      publications[selected.id].forEach(pub => {
+        const it = document.createElement('div');
+        it.className = 'publication-item';
+
+        const t = document.createElement('div');
+        t.style.fontWeight = '600';
+        t.textContent = pub.title;
+        it.appendChild(t);
+
+        const m = document.createElement('div');
+        m.style.fontSize = '12px';
+        m.style.display = 'flex';
+        m.style.gap = '10px';
+
+        const y = document.createElement('span');
+        y.textContent = pub.year;
+
+        const j = document.createElement('span');
+        j.textContent = pub.journal;
+
+        const a = document.createElement('a');
+        a.href = pub.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'publication-link';
+        a.textContent = pub.url;
+        m.appendChild(y);
+        m.appendChild(j);
+        m.appendChild(a);
+
+        it.appendChild(m);
+        list.appendChild(it);
+      });
+    }
+  } else {
+    backBtn.classList.remove('visible');
+  }
 }
 backBtn.addEventListener('click', ()=>select(null));
 renderList(); draw();
