@@ -195,12 +195,12 @@ canvas:active { cursor: grabbing; }
 <body>
 <header>
     <h1>Интерактивная карта: ИИ и международные отношения (с российским контекстом)</h1>
-    <div class="subtitle">Визуализация научных кластеров • Размер узла = объем публикаций • Толщина линии = сила связи • <span class="legend-star">*</span> Российские темы</div>
+    <div class="subtitle">Проект представляет собой интерактивную карту научных публикаций и исследовательских кластеров, связанных с искусственным интеллектом и международными отношениями, с акцентом на российский контекст. Система визуализирует структуру научных связей, динамику тематических областей, а также роль российских исследований в глобальном интеллектуальном ландшафте.</div>
     <div class="legend">
       <span class="legend-item"><span class="legend-circle" style="background:#3b82f6"></span>Научный кластер</span>
       <span class="legend-item"><span class="legend-star">*</span>Российские темы</span>
       <span class="legend-item">Толщина линии = сила связи</span>
-      <span class="legend-item">Размер кружка = публикаций</span>
+      <span class="legend-item">Размер кружка = число публикаций</span>
       <button id="theme-toggle" class="control-btn" style="margin-left:auto">☀️</button>
     </div>
 </header>
@@ -231,9 +231,33 @@ const clusters = [// Пример для одного кластера:
 { id: 1, label: "AI Governance", x: 400, y: 300, size: 45, color: "#3b82f6", papers: 1250,
   ru: "Управление ИИ", desc: "Вопросы регулирования, стандартов и глобальной ответственности в области искусственного интеллекта." }
 , 
-{"id": 2, "label": "AI & Military Strategy", "x": 250, "y": 200, "size": 38, "color": "#ef4444", "papers": 890}, 
-{"id": 3, "label": "Cyber Security", "x": 200, "y": 320, "size": 35, "color": "#dc2626", "papers": 780}, 
-{"id": 4, "label": "Autonomous Weapons", "x": 150, "y": 180, "size": 32, "color": "#991b1b", "papers": 650}, {"id": 5, "label": "Tech Sovereignty", "x": 550, "y": 180, "size": 36, "color": "#8b5cf6", "papers": 820}, {"id": 6, "label": "US-China AI Competition", "x": 650, "y": 250, "size": 40, "color": "#7c3aed", "papers": 950}, {"id": 7, "label": "Digital Authoritarianism", "x": 600, "y": 350, "size": 33, "color": "#6d28d9", "papers": 720}, {"id": 8, "label": "AI & Global Economy", "x": 450, "y": 480, "size": 37, "color": "#10b981", "papers": 840}, {"id": 9, "label": "Trade Policy & Tech", "x": 320, "y": 520, "size": 30, "color": "#059669", "papers": 620}, {"id": 10, "label": "Labor Markets", "x": 550, "y": 550, "size": 28, "color": "#047857", "papers": 580}, {"id": 11, "label": "Multilateral AI Policy", "x": 280, "y": 400, "size": 34, "color": "#f59e0b", "papers": 750}, {"id": 12, "label": "International Standards", "x": 380, "y": 150, "size": 31, "color": "#d97706", "papers": 680}, {"id": 13, "label": "EU AI Regulation", "x": 480, "y": 120, "size": 33, "color": "#b45309", "papers": 710}, {"id": 14, "label": "AI Ethics in IR", "x": 150, "y": 450, "size": 32, "color": "#ec4899", "papers": 690}, {"id": 15, "label": "Surveillance & Privacy", "x": 100, "y": 350, "size": 29, "color": "#db2777", "papers": 610}, {"id": 16, "label": "Digital Rights", "x": 200, "y": 520, "size": 27, "color": "#be185d", "papers": 560}, {"id": 17, "label": "AI & Climate Diplomacy", "x": 650, "y": 450, "size": 26, "color": "#14b8a6", "papers": 540}, {"id": 18, "label": "Disinformation & Propaganda", "x": 700, "y": 350, "size": 30, "color": "#f97316", "papers": 640}, {"id": 19, "label": "AI in Intelligence", "x": 300, "y": 250, "size": 28, "color": "#7f1d1d", "papers": 590}, {"id": 20, "label": "Emerging Tech Alliances", "x": 550, "y": 280, "size": 29, "color": "#5b21b6", "papers": 605}, {"id": 21, "label": "Global South & AI", "x": 400, "y": 580, "size": 27, "color": "#0891b2", "papers": 570}, {"id": 22, "label": "Indo-Pacific Strategy", "x": 680, "y": 180, "size": 28, "color": "#4338ca", "papers": 585}, {"id": 23, "label": "Russia AI Strategy & Sovereignty", "x": 500, "y": 400, "size": 32, "color": "#c026d3", "papers": 680, "isRussia": true}, {"id": 24, "label": "Russia-China AI Cooperation", "x": 620, "y": 420, "size": 30, "color": "#a21caf", "papers": 620, "isRussia": true}, {"id": 25, "label": "BRICS AI Governance", "x": 380, "y": 430, "size": 31, "color": "#f97316", "papers": 650, "isRussia": true}];
+[
+  { id: 2, label: "AI & Military Strategy", ru: "ИИ и военная стратегия", desc: "Использование искусственного интеллекта для тактики, планирования операций, анализа рисков и разработки новых военных возможностей." },
+  { id: 3, label: "Cyber Security", ru: "Кибербезопасность", desc: "Применение ИИ для защиты цифровой инфраструктуры, противодействия атакам и обеспечения приватности данных." },
+  { id: 4, label: "Autonomous Weapons", ru: "Автономное оружие", desc: "Разработка вооружённых систем, принимающих решения с использованием ИИ без прямого участия человека." },
+  { id: 5, label: "Tech Sovereignty", ru: "Технологический суверенитет", desc: "Стратегии независимости государств в ключевых технологических областях, включая разработку собственных ИИ-решений." },
+  { id: 6, label: "US-China AI Competition", ru: "США—Китай: конкуренция в ИИ", desc: "Глобальное соперничество между США и Китаем за лидерство в области искусственного интеллекта." },
+  { id: 7, label: "Digital Authoritarianism", ru: "Цифровой авторитаризм", desc: "Использование цифровых технологий и ИИ для контроля, слежки и ограничения свобод в интернете." },
+  { id: 8, label: "AI & Global Economy", ru: "ИИ и мировая экономика", desc: "Влияние искусственного интеллекта на экономические процессы, рынки труда и производительность на глобальном уровне." },
+  { id: 9, label: "Trade Policy & Tech", ru: "Торговая политика и технологии", desc: "Вопросы регулирования трансграничных технологий, экспортного контроля и цифровых барьеров." },
+  { id: 10, label: "Labor Markets", ru: "Рынки труда", desc: "Влияние автоматизации и ИИ на занятость, новые профессии, структурные изменения рабочей силы." },
+  { id: 11, label: "Multilateral AI Policy", ru: "Многосторонняя политика в ИИ", desc: "Международное сотрудничество по выработке правил и стандартов в сфере искусственного интеллекта." },
+  { id: 12, label: "International Standards", ru: "Международные стандарты", desc: "Разработка и внедрение общих стандартов в области ИИ для повышения совместимости и безопасности." },
+  { id: 13, label: "EU AI Regulation", ru: "Регулирование ИИ в ЕС", desc: "Правовые рамки Европейского Союза в сфере искусственного интеллекта, включая GDPR и AI Act." },
+  { id: 14, label: "AI Ethics in IR", ru: "Этика ИИ в международных отношениях", desc: "Нормативные и моральные дилеммы использования ИИ в глобальном управлении, безопасности и дипломатии." },
+  { id: 15, label: "Surveillance & Privacy", ru: "Слежка и приватность", desc: "Применение ИИ для мониторинга, риски вмешательства в личную жизнь и защита данных." },
+  { id: 16, label: "Digital Rights", ru: "Цифровые права", desc: "Права и свободы человека в цифровую эпоху: доступ к информации, свобода слова, защита от дискриминации." },
+  { id: 17, label: "AI & Climate Diplomacy", ru: "ИИ и климатическая дипломатия", desc: "Применение ИИ для мониторинга экологических процессов, поддержки решений в области климатической политики." },
+  { id: 18, label: "Disinformation & Propaganda", ru: "Дезинформация и пропаганда", desc: "Использование ИИ для создания, распространения и анализа манипулятивных информационных потоков." },
+  { id: 19, label: "AI in Intelligence", ru: "ИИ в разведке", desc: "Внедрение ИИ в системы сбора, анализа и использования данных для национальной безопасности." },
+  { id: 20, label: "Emerging Tech Alliances", ru: "Альянсы новых технологий", desc: "Международное взаимодействие для совместной разработки и внедрения инновационных ИИ-решений." },
+  { id: 21, label: "Global South & AI", ru: "Глобальный Юг и ИИ", desc: "Роль развивающихся стран в ИИ, вызовы внедрения технологий и международная кооперация." },
+  { id: 22, label: "Indo-Pacific Strategy", ru: "Индуктор стратегии Индо-Тихоокеанского региона", desc: "Стратегические инициативы государств региона по развитию и интеграции ИИ." },
+  { id: 23, label: "Russia AI Strategy & Sovereignty", ru: "Россия: стратегия и суверенитет в ИИ", desc: "Национальная политика и инициативы России по развитию собственных ИИ-технологий." },
+  { id: 24, label: "Russia-China AI Cooperation", ru: "Сотрудничество России и Китая в ИИ", desc: "Интеграция усилий России и Китая в исследовании, разработке и внедрении искусственного интеллекта." },
+  { id: 25, label: "BRICS AI Governance", ru: "Управление ИИ в БРИКС", desc: "Коллективные подходы стран БРИКС к регулированию, развитию и внедрению ИИ." }
+]
+
 const scaleFactor = 1.8;
 clusters.forEach(cluster => {
   cluster.x *= scaleFactor;
